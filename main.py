@@ -24,37 +24,42 @@ while True:
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_w and dirs[pg.K_w]:
                 snake_dir = (0, -TITLE_SIZE)
-                {pg.K_w: 1, pg.K_s: 0, pg.K_a: 1, pg.K_d: 1}
+                dirs = {pg.K_w: 1, pg.K_s: 0, pg.K_a: 1, pg.K_d: 1}
             if event.key == pg.K_s and dirs[pg.K_s]:
                 snake_dir = (0, TITLE_SIZE)
-                {pg.K_w: 0, pg.K_s: 1, pg.K_a: 1, pg.K_d: 1}
+                dirs = {pg.K_w: 0, pg.K_s: 1, pg.K_a: 1, pg.K_d: 1}
             if event.key == pg.K_a and dirs[pg.K_a]:
                 snake_dir = (-TITLE_SIZE, 0)
-                {pg.K_w: 1, pg.K_s: 1, pg.K_a: 1, pg.K_d: 0}
+                dirs = {pg.K_w: 1, pg.K_s: 1, pg.K_a: 1, pg.K_d: 0}
             if event.key == pg.K_d and dirs[pg.K_d]:
                 snake_dir = (TITLE_SIZE, 0)
-                {pg.K_w: 1, pg.K_s: 1, pg.K_a: 0, pg.K_d: 1}
-        screen.fill('black')
-        #check_borders & self eating
+                dirs = {pg.K_w: 1, pg.K_s: 1, pg.K_a: 0, pg.K_d: 1}
+
+    # di chuyển rắn
+    time_now = pg.time.get_ticks()
+    if time_now - time > time_step:
+        time = time_now
+        snake.move_ip(snake_dir)
+        segments.append(snake.copy())
+        segments = segments[-length:]
+
+        # kiểm tra va chạm
         self_eating = pg.Rect.collidelist(snake, segments[:-1]) != -1
         if snake.left < 0 or snake.right > WINDOW or snake.top < 0 or snake.bottom > WINDOW or self_eating:
             snake.center, food.center = get_random_position(), get_random_position()
             length, snake_dir = 1, (0, 0)
             segments = [snake.copy()]
-        #check food
+
+        # kiểm tra thức ăn
         if snake.center == food.center:
             food.center = get_random_position()
             length += 1
-        #draw food
+
+        # vẽ lại các phần tử đã thay đổi
+        screen.fill('black')
         pg.draw.rect(screen, 'red', food)
-        #draw snake
         [pg.draw.rect(screen, 'green', segment) for segment in segments]
-        #move snake
-        time_now = pg.time.get_ticks()
-        if time_now - time > time_step:
-            time = time_now
-            snake.move_ip(snake_dir)
-            segments.append(snake.copy())
-            segments = segments[-length:]
-        pg.display.flip()
-        clock.tick(60)
+        pg.display.update()
+
+    # tối ưu tốc độ game
+    clock.tick(60)
