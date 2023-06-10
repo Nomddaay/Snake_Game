@@ -1,6 +1,8 @@
 import pygame as pg
 from random import randrange
 
+pg.init()
+
 WINDOW = 700 
 TITLE_SIZE = 30
 RANGE = (TITLE_SIZE // 2, WINDOW - TITLE_SIZE // 2, TITLE_SIZE)
@@ -13,9 +15,25 @@ snake_dir = (0, 0)
 time, time_step = 0, 110
 food = snake.copy()
 food.center = get_random_position()
+food_color = 'red'
+food_count = 0
 screen = pg.display.set_mode([WINDOW]*2)
 clock = pg.time.Clock()
 dirs = {pg.K_w: 1, pg.K_s: 1, pg.K_a: 1, pg.K_d: 1}
+
+def draw():
+    # vẽ lại các phần tử đã thay đổi
+    screen.fill('black')
+    pg.draw.rect(screen, food_color , food)
+    [pg.draw.rect(screen, 'green', segment) for segment in segments]
+
+    # hiển thị điểm số trên màn hình
+    font = pg.font.SysFont('Arial', 23)
+    text = font.render(f'Score: {score}', True, 'white')
+    text_rect = text.get_rect(topright=(WINDOW - 5, 5))
+    screen.blit(text, text_rect)
+
+    pg.display.update()
 
 while True:
     for event in pg.event.get():
@@ -50,16 +68,23 @@ while True:
             length, snake_dir = 1, (0, 0)
             segments = [snake.copy()]
 
-        # kiểm tra thức ăn
+        # Kiểm tra thức ăn
         if snake.center == food.center:
+            if food_color == 'red':
+                food_count += 1
+                if food_count >= 5:
+                    food_color = 'yellow'
+                    food_count = 0
+            else:
+                food_color = 'red'
             food.center = get_random_position()
             length += 1
+        
+        # tính điểm
+        score = (length - 1) * 5
 
-        # vẽ lại các phần tử đã thay đổi
-        screen.fill('black')
-        pg.draw.rect(screen, 'red', food)
-        [pg.draw.rect(screen, 'green', segment) for segment in segments]
-        pg.display.update()
+        # hiển thị trò chơi và điểm số
+        draw()
 
     # tối ưu tốc độ game
     clock.tick(60)
